@@ -40,7 +40,10 @@
                     Margin="10, 0, 10, 0"/>
         </StackPanel>
         <Grid Background="#3F3F46">
-            <Image Name="RenderImage"/>
+            <Image Name="RenderImage"
+                   MouseLeftButtonDown="RenderImage_OnMouseLeftButtonUp"
+                   MouseRightButtonDown="RenderImage_OnMouseRightButtonDown"
+                   Cursor="Cross"/>
         </Grid>
     </DockPanel>
 </Window>

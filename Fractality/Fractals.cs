@@ -7,7 +7,7 @@ namespace Fractality
 {
     public interface FractalDrawer
     {
-        ImageSource Render();
+        ImageSource Render(int renderWidth, int renderHeight);
     }
 
     public class Complex
@@ -51,28 +51,29 @@ namespace Fractality
 
     public class MandelbrotDrawer : FractalDrawer
     {
-        private int renderWidth;
-        private int renderHeight;
+        private double multiplyFactor = 1;
+        private double originX = 0;
+        private double originY = 0;
 
-        public int RenderWidth
+        public double MultiplyFactor
         {
-            get => renderWidth;
-            set => renderWidth = value;
+            get => multiplyFactor;
+            set => multiplyFactor = value;
         }
 
-        public int RenderHeight
+        public double OriginX
         {
-            get => renderHeight;
-            set => renderHeight = value;
+            get => originX;
+            set => originX = value;
         }
 
-        public MandelbrotDrawer(int renderWidth, int renderHeight)
+        public double OriginY
         {
-            this.renderWidth = renderWidth;
-            this.renderHeight = renderHeight;
+            get => originY;
+            set => originY = value;
         }
 
-        public ImageSource Render()
+        public ImageSource Render(int renderWidth, int renderHeight)
         {
             var bitmap = new WriteableBitmap(renderWidth, renderHeight, 96, 96, 
                 PixelFormats.Bgra32, null);
@@ -80,12 +81,16 @@ namespace Fractality
             byte[] leavingColor = {0, 0, 0, 0};
             byte[] stayingColor = {255, 255, 255, 255};
 
+            var ratio = (double) renderWidth / renderHeight;
+            var areaHeight = 4d / multiplyFactor;
+            var areaWidth = areaHeight * ratio;
+            
             for (var j = 0; j < renderHeight; j++)
             {
                 for (var i = 0; i < renderWidth; i++)
                 {
-                    var x = (-renderWidth / 2 + i) / 100d;
-                    var y = (renderHeight / 2 - j) / 100d;
+                    var x = originX - areaWidth / 2d + i * (areaWidth / renderWidth);
+                    var y = originY + areaHeight / 2d - j * (areaHeight / renderHeight);
                     
                     var rect = new Int32Rect(i, j, 1, 1);
 
