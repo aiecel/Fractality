@@ -31,15 +31,31 @@
                 <TextBox Grid.Column="1" Grid.Row="1" Name="HeightResBox" Text="480"></TextBox>
             </Grid>
             
+            <TextBlock Text="Max iterations:" 
+                       Margin="10, 10, 10, 2" />
+            <TextBox Name="MaxIterationsBox"
+                     Text="100"
+                     Margin="10, 0, 10, 2" />
+
             <Separator Margin="10, 15, 10, 15" />
             
             <Button Content="Render" 
                     FontWeight="Bold"
                     Height="30"
                     Click="RenderButton_OnClick"
-                    Margin="10, 0, 10, 0"/>
+                    Margin="10, 0, 10, 5"/>
+            
+            <Button Content="Reset view" 
+                    Click="ResetViewButton_OnClick"
+                    Margin="10, 5, 10, 0"/>
         </StackPanel>
-        <Grid Background="#3F3F46">
+        
+        <StackPanel DockPanel.Dock="Bottom" Height="25" Orientation="Horizontal">
+            <TextBlock Name="ZoomText" Text="" Margin="5, 4, 5, 4"></TextBlock>
+            <TextBlock Name="OriginText" Text="" Margin="5, 4, 5, 4"></TextBlock>
+        </StackPanel>
+        
+        <Grid Background="#1E1E1E">
             <Image Name="RenderImage"
                    MouseLeftButtonDown="RenderImage_OnMouseLeftButtonUp"
                    MouseRightButtonDown="RenderImage_OnMouseRightButtonDown"

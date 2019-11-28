@@ -21,6 +21,14 @@ namespace Fractality
         {
             Render();
         }
+        
+        private void ResetViewButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            drawer.OriginX = 0;
+            drawer.OriginY = 0;
+            drawer.MultiplyFactor = 1;
+            Render();
+        }
 
         private void RenderImage_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -60,8 +68,10 @@ namespace Fractality
         {
             renderWidth = int.Parse(WidthResBox.Text);
             renderHeight = int.Parse(HeightResBox.Text);
-            RenderImage.Source = 
-                drawer.Render(renderWidth, renderHeight);
+            drawer.MaxIterations = int.Parse(MaxIterationsBox.Text);
+            RenderImage.Source = drawer.Render(renderWidth, renderHeight);
+            ZoomText.Text = "x" + drawer.MultiplyFactor;
+            OriginText.Text = "Origin: x=" + drawer.OriginX + "; y=" + drawer.OriginY;
         }
     }
 }

@@ -54,6 +54,7 @@ namespace Fractality
         private double multiplyFactor = 1;
         private double originX = 0;
         private double originY = 0;
+        private int maxIterations = 100;
 
         public double MultiplyFactor
         {
@@ -73,13 +74,18 @@ namespace Fractality
             set => originY = value;
         }
 
+        public int MaxIterations
+        {
+            get => maxIterations;
+            set => maxIterations = value;
+        }
+
         public ImageSource Render(int renderWidth, int renderHeight)
         {
             var bitmap = new WriteableBitmap(renderWidth, renderHeight, 96, 96, 
                 PixelFormats.Bgra32, null);
             
-            byte[] leavingColor = {0, 0, 0, 0};
-            byte[] stayingColor = {255, 255, 255, 255};
+            byte[] stayingColor = {0, 0, 0, 255};
 
             var ratio = (double) renderWidth / renderHeight;
             var areaHeight = 4d / multiplyFactor;
@@ -93,24 +99,32 @@ namespace Fractality
                     var y = originY + areaHeight / 2d - j * (areaHeight / renderHeight);
                     
                     var rect = new Int32Rect(i, j, 1, 1);
-
-                    bitmap.WritePixels(rect,
-                        IsLeaving(new Complex(x, y)) ? leavingColor : stayingColor, 4, 0);
+                    var leavingIterations = LeavingIterations(new Complex(x, y));
+                    if (leavingIterations != -1)
+                    {
+                        var value = (byte) ((double)leavingIterations / maxIterations * 255);
+                        byte[] leavingColor = {255, 255, 255, value};
+                        bitmap.WritePixels(rect, leavingColor, 4, 0);
+                    }
+                    else
+                    {
+                        bitmap.WritePixels(rect, stayingColor, 4, 0);
+                    }
                 }
             }
 
             return bitmap;
         }
 
-        private bool IsLeaving(Complex c)
+        private int LeavingIterations(Complex c)
         {
             var z = new Complex(0, 0);
-            for (var i = 0; i < 100; i++)
+            for (var i = 0; i < maxIterations; i++)
             {
                 z = z.Sq().Add(c);
-                if (z.Mod() > 2) return true;
+                if (z.Mod() > 2) return i + 1;
             }
-            return false;
+            return -1;
         }
     }
 }
