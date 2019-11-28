@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace Fractality
 {
@@ -11,11 +12,12 @@ namespace Fractality
         {
             InitializeComponent();
         }
-
-        private void SomeButton_OnClick(object sender, RoutedEventArgs e)
+        
+        private void RenderButton_OnClick(object sender, RoutedEventArgs e)
         {
-            FractalDrawer drawer = new MandelbrotDrawer(800, 600);
-            MainImage.Source = drawer.Render();
+            FractalDrawer drawer = 
+                new MandelbrotDrawer(int.Parse(WidthResBox.Text), int.Parse(HeightResBox.Text));
+            RenderImage.Source = drawer.Render();
         }
     }
 }

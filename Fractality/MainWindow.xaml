@@ -5,15 +5,42 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Fractality"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800">
-    <StackPanel>
-        <Image Width="640" 
-               Height="480" 
-               Name="MainImage" />
-        <Button Name="SomeButton" 
-                Click="SomeButton_OnClick" 
-                Width="200" 
-                Height="30"
-                Content="Рисуй чорт"/>
-    </StackPanel>
+        Title="Fractality" Height="600" Width="800">
+    <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Right" Width="200">
+            <TextBlock Text="Render Settings:" 
+                       FontWeight="Bold" 
+                       Margin="10, 10, 10, 10" />
+            
+            <TextBlock Text="Resolution:" 
+                       Margin="10, 0, 10, 2" />
+            
+            <Grid Margin="10, 0, 10, 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="Width"></TextBlock>
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="Height"></TextBlock>
+                <TextBox Grid.Column="0" Grid.Row="1" Name="WidthResBox" Text="640"></TextBox>
+                <TextBox Grid.Column="1" Grid.Row="1" Name="HeightResBox" Text="480"></TextBox>
+            </Grid>
+            
+            <Separator Margin="10, 15, 10, 15" />
+            
+            <Button Content="Render" 
+                    FontWeight="Bold"
+                    Height="30"
+                    Click="RenderButton_OnClick"
+                    Margin="10, 0, 10, 0"/>
+        </StackPanel>
+        <Grid Background="#3F3F46">
+            <Image Name="RenderImage"/>
+        </Grid>
+    </DockPanel>
 </Window>

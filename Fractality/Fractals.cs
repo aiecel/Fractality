@@ -75,10 +75,10 @@ namespace Fractality
         public ImageSource Render()
         {
             var bitmap = new WriteableBitmap(renderWidth, renderHeight, 96, 96, 
-                PixelFormats.Bgr24, null);
+                PixelFormats.Bgra32, null);
             
-            byte[] leavingColor = {0, 0, 0};
-            byte[] stayingColor = {255, 255, 255};
+            byte[] leavingColor = {0, 0, 0, 0};
+            byte[] stayingColor = {255, 255, 255, 255};
 
             for (var j = 0; j < renderHeight; j++)
             {
@@ -89,7 +89,8 @@ namespace Fractality
                     
                     var rect = new Int32Rect(i, j, 1, 1);
 
-                    bitmap.WritePixels(rect, IsLeaving(new Complex(x, y)) ? leavingColor : stayingColor, 3, 0);
+                    bitmap.WritePixels(rect,
+                        IsLeaving(new Complex(x, y)) ? leavingColor : stayingColor, 4, 0);
                 }
             }
 
