@@ -5,8 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Fractality"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow" Height="600" Width="800">
+    <StackPanel>
+        <Image Width="640" 
+               Height="480" 
+               Name="MainImage" />
+        <Button Name="SomeButton" 
+                Click="SomeButton_OnClick" 
+                Width="200" 
+                Height="30"
+                Content="Рисуй чорт"/>
+    </StackPanel>
 </Window>
