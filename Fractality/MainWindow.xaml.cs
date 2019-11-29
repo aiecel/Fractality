@@ -28,7 +28,17 @@ namespace Fractality
         
         private void RenderButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Render();
+            if (worker.IsBusy)
+            {
+                SaveToFileButton.IsEnabled = true;
+                ResetViewButton.IsEnabled = true;
+                worker.CancelAsync();
+                RenderButton.Content = "Render";
+            }
+            else
+            {
+                Render();
+            }
         }
         
         private void RenderToFileButton_OnClick(object sender, RoutedEventArgs e)
@@ -61,9 +71,12 @@ namespace Fractality
             var pixelHeight = RenderImage.Source.Height;
             var xClick = pixelWidth * clickPoint.X / RenderImage.ActualWidth;
             var yClick = pixelHeight * clickPoint.Y / RenderImage.ActualHeight;
-            UpdateOrigin(xClick, yClick);
-            renderer.MultiplyFactor *= double.Parse(ZoomFactorBox.Text);
-            Render();
+            if (!worker.IsBusy)
+            {
+                UpdateOrigin(xClick, yClick);
+                renderer.MultiplyFactor *= double.Parse(ZoomFactorBox.Text);
+                Render();
+            }
         }
         
         private void RenderImage_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -90,6 +103,9 @@ namespace Fractality
 
         private void Render()
         {
+            SaveToFileButton.IsEnabled = false;
+            ResetViewButton.IsEnabled = false;
+            RenderButton.Content = "Stop render";
             renderWidth = int.Parse(WidthResBox.Text);
             renderHeight = int.Parse(HeightResBox.Text);
             renderer.MaxIterations = int.Parse(MaxIterationsBox.Text);
@@ -122,6 +138,9 @@ namespace Fractality
             TimeText.Text = watch.ElapsedMilliseconds + "ms.";
             ZoomText.Text = "x" + renderer.MultiplyFactor;
             OriginText.Text = "Origin: x=" + renderer.OriginX + "; y=" + renderer.OriginY;
+            SaveToFileButton.IsEnabled = true;
+            ResetViewButton.IsEnabled = true;
+            RenderButton.Content = "Render";
         }
 
         private void BackgroundWorker_OnProgressChanged(object sender, ProgressChangedEventArgs e)

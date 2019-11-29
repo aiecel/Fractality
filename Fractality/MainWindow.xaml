@@ -12,6 +12,7 @@
                              DoWork="BackgroundWorker_OnDoWork"
                              RunWorkerCompleted="BackgroundWorker_OnRunWorkerCompleted"
                              ProgressChanged="BackgroundWorker_OnProgressChanged"
+                             WorkerSupportsCancellation="True"
                              WorkerReportsProgress="True"></cm:BackgroundWorker>
     </Window.Resources>
     
@@ -64,17 +65,20 @@
 
             <Separator Margin="10, 15, 10, 15" />
             
-            <Button Content="Render" 
+            <Button Name="RenderButton"
+                    Content="Render" 
                     FontWeight="Bold"
                     Height="30"
                     Click="RenderButton_OnClick"
                     Margin="10, 0, 10, 5"/>
             
-            <Button Content="Render to file" 
+            <Button Name="SaveToFileButton"
+                    Content="Save to file" 
                     Click="RenderToFileButton_OnClick"
                     Margin="10, 0, 10, 0"/>
             
-            <Button Content="Reset view" 
+            <Button Name="ResetViewButton"
+                    Content="Reset view" 
                     Click="ResetViewButton_OnClick"
                     Margin="10, 5, 10, 0"/>
         </StackPanel>

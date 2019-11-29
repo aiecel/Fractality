@@ -132,6 +132,11 @@ namespace Fractality
                     {
                         worker.ReportProgress((int) ((double) pixelCount / pixelsTotal * 100));
                     }
+
+                    if (worker.CancellationPending)
+                    {
+                        return;
+                    }
                 }
             });
 
