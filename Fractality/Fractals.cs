@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -88,6 +89,9 @@ namespace Fractality
             
             var bitmap = new WriteableBitmap(renderWidth, renderHeight, 96, 96, 
                 PixelFormats.Bgra32, null);
+
+            var pixelWidth = bitmap.PixelWidth;
+            var bitsPerPixel = bitmap.Format.BitsPerPixel;
             
             var rect = new Int32Rect(0, 0, renderWidth, renderHeight);
             var pixels = new byte[pixelsTotal * bitmap.Format.BitsPerPixel / 8];
@@ -96,20 +100,19 @@ namespace Fractality
             var areaHeight = 4d / multiplyFactor;
             var areaWidth = areaHeight * ratio;
             
-            
-            for (var j = 0; j < renderHeight; j++)
+            Parallel.For(0, renderHeight, j =>
             {
                 for (var i = 0; i < renderWidth; i++)
                 {
                     var x = originX - areaWidth / 2d + i * (areaWidth / renderWidth);
                     var y = originY + areaHeight / 2d - j * (areaHeight / renderHeight);
 
-                    var pixel = (i + j * bitmap.PixelWidth) * bitmap.Format.BitsPerPixel / 8;
-                    
+                    var pixel = (i + j * pixelWidth) * bitsPerPixel / 8;
+
                     var leavingIterations = LeavingIterations(new Complex(x, y));
                     if (leavingIterations != -1)
                     {
-                        var value = (byte) ((double)leavingIterations / maxIterations * 255);
+                        var value = (byte) ((double) leavingIterations / maxIterations * 255);
                         pixels[pixel] = value;
                         pixels[pixel + 1] = value;
                         pixels[pixel + 2] = value;
@@ -130,9 +133,9 @@ namespace Fractality
                         worker.ReportProgress((int) ((double) pixelCount / pixelsTotal * 100));
                     }
                 }
-            }
+            });
 
-            var stride = bitmap.PixelWidth * bitmap.Format.BitsPerPixel / 8;
+            var stride = pixelWidth * bitsPerPixel / 8;
             bitmap.WritePixels(rect, pixels, stride, 0);
 
             return bitmap;
