@@ -85,7 +85,8 @@ namespace Fractality
             var bitmap = new WriteableBitmap(renderWidth, renderHeight, 96, 96, 
                 PixelFormats.Bgra32, null);
             
-            byte[] stayingColor = {0, 0, 0, 255};
+            var rect = new Int32Rect(0, 0, renderWidth, renderHeight);
+            var pixels = new byte[renderWidth * renderHeight * bitmap.Format.BitsPerPixel / 8];
 
             var ratio = (double) renderWidth / renderHeight;
             var areaHeight = 4d / multiplyFactor;
@@ -97,21 +98,30 @@ namespace Fractality
                 {
                     var x = originX - areaWidth / 2d + i * (areaWidth / renderWidth);
                     var y = originY + areaHeight / 2d - j * (areaHeight / renderHeight);
+
+                    var pixel = (i + j * bitmap.PixelWidth) * bitmap.Format.BitsPerPixel / 8;
                     
-                    var rect = new Int32Rect(i, j, 1, 1);
                     var leavingIterations = LeavingIterations(new Complex(x, y));
                     if (leavingIterations != -1)
                     {
                         var value = (byte) ((double)leavingIterations / maxIterations * 255);
-                        byte[] leavingColor = {value, value, value, 255};
-                        bitmap.WritePixels(rect, leavingColor, 4, 0);
+                        pixels[pixel] = value;
+                        pixels[pixel + 1] = value;
+                        pixels[pixel + 2] = value;
+                        pixels[pixel + 3] = 255;
                     }
                     else
                     {
-                        bitmap.WritePixels(rect, stayingColor, 4, 0);
+                        pixels[pixel] = 0;
+                        pixels[pixel + 1] = 0;
+                        pixels[pixel + 2] = 0;
+                        pixels[pixel + 3] = 255;
                     }
                 }
             }
+            
+            var stride = (bitmap.PixelWidth * bitmap.Format.BitsPerPixel) / 8;
+            bitmap.WritePixels(rect, pixels, stride, 0);
 
             return bitmap;
         }
