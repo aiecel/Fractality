@@ -8,9 +8,25 @@
         Title="Fractality" Height="600" Width="800">
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Right" Width="200">
-            <TextBlock Text="Render Settings:" 
+            <TextBlock Text="Controls:" 
                        FontWeight="Bold" 
                        Margin="10, 10, 10, 10" />
+            
+            <Grid Margin="10, 0, 10, 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="Zoom Factor:"></TextBlock>
+                <TextBox Grid.Column="1" Name="ZoomFactorBox" Text="2"></TextBox>
+            </Grid>
+            
+            <Separator Margin="10, 15, 10, 10" />
+            
+            <TextBlock Text="Render:" 
+                       FontWeight="Bold" 
+                       Margin="10, 0, 10, 10" />
             
             <TextBlock Text="Resolution:" 
                        Margin="10, 0, 10, 2" />
@@ -45,6 +61,10 @@
                     Click="RenderButton_OnClick"
                     Margin="10, 0, 10, 5"/>
             
+            <Button Content="Render to file" 
+                    Click="RenderToFileButton_OnClick"
+                    Margin="10, 0, 10, 0"/>
+            
             <Button Content="Reset view" 
                     Click="ResetViewButton_OnClick"
                     Margin="10, 5, 10, 0"/>
@@ -53,6 +73,7 @@
         <StackPanel DockPanel.Dock="Bottom" Height="25" Orientation="Horizontal">
             <TextBlock Name="ZoomText" Text="" Margin="5, 4, 5, 4"></TextBlock>
             <TextBlock Name="OriginText" Text="" Margin="5, 4, 5, 4"></TextBlock>
+            <TextBlock Name="TimeText" Text="" Margin="5, 4, 5, 4"></TextBlock>
         </StackPanel>
         
         <Grid Background="#1E1E1E">

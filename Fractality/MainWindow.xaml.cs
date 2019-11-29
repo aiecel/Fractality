@@ -1,5 +1,9 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
+using Microsoft.Win32;
 
 namespace Fractality
 {
@@ -8,7 +12,7 @@ namespace Fractality
     /// </summary>
     public partial class MainWindow
     {
-        private MandelbrotDrawer drawer = new MandelbrotDrawer();
+        private MandelbrotRenderer _renderer = new MandelbrotRenderer();
         private int renderWidth = 0;
         private int renderHeight = 0;
 
@@ -22,11 +26,26 @@ namespace Fractality
             Render();
         }
         
+        private void RenderToFileButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var saveFileDialog = new SaveFileDialog();
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                var a = _renderer.Render(renderWidth, renderHeight);
+                using (var stream = new FileStream(saveFileDialog.FileName, FileMode.Create))
+                {
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(a));
+                    encoder.Save(stream);
+                }
+            }
+        }
+        
         private void ResetViewButton_OnClick(object sender, RoutedEventArgs e)
         {
-            drawer.OriginX = 0;
-            drawer.OriginY = 0;
-            drawer.MultiplyFactor = 1;
+            _renderer.OriginX = 0;
+            _renderer.OriginY = 0;
+            _renderer.MultiplyFactor = 1;
             Render();
         }
 
@@ -38,7 +57,7 @@ namespace Fractality
             var xClick = pixelWidth * clickPoint.X / RenderImage.ActualWidth;
             var yClick = pixelHeight * clickPoint.Y / RenderImage.ActualHeight;
             UpdateOrigin(xClick, yClick);
-            drawer.MultiplyFactor *= 2;
+            _renderer.MultiplyFactor *= double.Parse(ZoomFactorBox.Text);
             Render();
         }
         
@@ -50,28 +69,31 @@ namespace Fractality
             var xClick = RenderImage.ActualWidth - pixelWidth * clickPoint.X / RenderImage.ActualWidth;
             var yClick = RenderImage.ActualHeight - pixelHeight * clickPoint.Y / RenderImage.ActualHeight;
             UpdateOrigin(xClick, yClick);
-            drawer.MultiplyFactor /= 2;
+            _renderer.MultiplyFactor /= double.Parse(ZoomFactorBox.Text);
             Render();
         }
 
         private void UpdateOrigin(double xClick, double yClick)
         {
             var ratio = (double) renderWidth / renderHeight;
-            var areaHeight = 4d / drawer.MultiplyFactor;
+            var areaHeight = 4d / _renderer.MultiplyFactor;
             var areaWidth = areaHeight * ratio;
             
-            drawer.OriginX = drawer.OriginX - areaWidth / 2d + xClick * (areaWidth / renderWidth);
-            drawer.OriginY = drawer.OriginY + areaHeight / 2d - yClick * (areaHeight / renderHeight);
+            _renderer.OriginX = _renderer.OriginX - areaWidth / 2d + xClick * (areaWidth / renderWidth);
+            _renderer.OriginY = _renderer.OriginY + areaHeight / 2d - yClick * (areaHeight / renderHeight);
         }
 
         private void Render()
         {
             renderWidth = int.Parse(WidthResBox.Text);
             renderHeight = int.Parse(HeightResBox.Text);
-            drawer.MaxIterations = int.Parse(MaxIterationsBox.Text);
-            RenderImage.Source = drawer.Render(renderWidth, renderHeight);
-            ZoomText.Text = "x" + drawer.MultiplyFactor;
-            OriginText.Text = "Origin: x=" + drawer.OriginX + "; y=" + drawer.OriginY;
+            _renderer.MaxIterations = int.Parse(MaxIterationsBox.Text);
+            var watch = Stopwatch.StartNew();
+            RenderImage.Source = _renderer.Render(renderWidth, renderHeight);
+            watch.Stop();
+            TimeText.Text = watch.ElapsedMilliseconds + "ms.";
+            ZoomText.Text = "x" + _renderer.MultiplyFactor;
+            OriginText.Text = "Origin: x=" + _renderer.OriginX + "; y=" + _renderer.OriginY;
         }
     }
 }

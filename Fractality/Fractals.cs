@@ -5,9 +5,9 @@ using System.Windows.Media.Imaging;
 
 namespace Fractality
 {
-    public interface FractalDrawer
+    public interface FractalRenderer
     {
-        ImageSource Render(int renderWidth, int renderHeight);
+        BitmapSource Render(int renderWidth, int renderHeight);
     }
 
     public class Complex
@@ -49,7 +49,7 @@ namespace Fractality
         }
     }
 
-    public class MandelbrotDrawer : FractalDrawer
+    public class MandelbrotRenderer : FractalRenderer
     {
         private double multiplyFactor = 1;
         private double originX = 0;
@@ -80,7 +80,7 @@ namespace Fractality
             set => maxIterations = value;
         }
 
-        public ImageSource Render(int renderWidth, int renderHeight)
+        public BitmapSource Render(int renderWidth, int renderHeight)
         {
             var bitmap = new WriteableBitmap(renderWidth, renderHeight, 96, 96, 
                 PixelFormats.Bgra32, null);
@@ -103,7 +103,7 @@ namespace Fractality
                     if (leavingIterations != -1)
                     {
                         var value = (byte) ((double)leavingIterations / maxIterations * 255);
-                        byte[] leavingColor = {255, 255, 255, value};
+                        byte[] leavingColor = {value, value, value, 255};
                         bitmap.WritePixels(rect, leavingColor, 4, 0);
                     }
                     else
