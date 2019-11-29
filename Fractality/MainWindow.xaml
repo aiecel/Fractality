@@ -3,9 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
         xmlns:local="clr-namespace:Fractality"
         mc:Ignorable="d"
-        Title="Fractality" Height="600" Width="800">
+        Title="Fractality" Height="768" Width="1024">
+    <Window.Resources>
+        <cm:BackgroundWorker x:Key="backgroundWorker" 
+                             DoWork="BackgroundWorker_OnDoWork"
+                             RunWorkerCompleted="BackgroundWorker_OnRunWorkerCompleted"
+                             ProgressChanged="BackgroundWorker_OnProgressChanged"
+                             WorkerReportsProgress="True"></cm:BackgroundWorker>
+    </Window.Resources>
+    
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Right" Width="200">
             <TextBlock Text="Controls:" 
@@ -70,10 +79,15 @@
                     Margin="10, 5, 10, 0"/>
         </StackPanel>
         
-        <StackPanel DockPanel.Dock="Bottom" Height="25" Orientation="Horizontal">
+        <StackPanel DockPanel.Dock="Bottom" Height="25" Orientation="Horizontal" Background="LightGray">
             <TextBlock Name="ZoomText" Text="" Margin="5, 4, 5, 4"></TextBlock>
             <TextBlock Name="OriginText" Text="" Margin="5, 4, 5, 4"></TextBlock>
             <TextBlock Name="TimeText" Text="" Margin="5, 4, 5, 4"></TextBlock>
+            <StackPanel Name="RenderingPanel" Grid.Column="3" Orientation="Horizontal" Visibility="Hidden">
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"></Separator>
+                <TextBlock Text="Rendering..." Margin="5, 4, 5, 4"></TextBlock>
+                <ProgressBar Name="RenderBar" Width="200" Grid.Column="3" Height="10"/>
+            </StackPanel>
         </StackPanel>
         
         <Grid Background="#1E1E1E">
