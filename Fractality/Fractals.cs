@@ -14,12 +14,18 @@ namespace Fractality
         public double MultiplyFactor { get; set; } = 1;
         public int MaxIterations { get; set; } = 100;
         
+        public BackgroundWorker Worker { get; set; }
+        
         private int[,] iterationMap;
 
-        public BitmapSource Render(int renderWidth, int renderHeight, BackgroundWorker worker)
+        public BitmapSource Render(int renderWidth, int renderHeight, Palette palette)
         {
-            Map(renderWidth, renderHeight, worker);
-            
+            Map(renderWidth, renderHeight);
+            return WriteBitmap(renderWidth, renderHeight, palette);
+        }
+
+        public WriteableBitmap WriteBitmap(int renderWidth, int renderHeight, Palette palette)
+        {
             var bitmap = new WriteableBitmap(renderWidth, renderHeight, 96, 96, 
                 PixelFormats.Bgra32, null);
 
@@ -37,11 +43,11 @@ namespace Fractality
                     var leavingIterations = iterationMap[i, j];
                     if (leavingIterations != -1)
                     {
-                        var value = (byte) ((double) leavingIterations / MaxIterations * 255);
-                        pixels[pixel] = value;
-                        pixels[pixel + 1] = value;
-                        pixels[pixel + 2] = value;
-                        pixels[pixel + 3] = 255;
+                        var color = palette.GetColor(((double) leavingIterations / MaxIterations) * 100);
+                        pixels[pixel] = color.B;
+                        pixels[pixel + 1] = color.G;
+                        pixels[pixel + 2] = color.R;
+                        pixels[pixel + 3] = color.A;
                     }
                     else
                     {
@@ -59,7 +65,7 @@ namespace Fractality
             return bitmap;
         }
         
-        private void Map(int renderWidth, int renderHeight, BackgroundWorker worker)
+        private void Map(int renderWidth, int renderHeight)
         {
             iterationMap = new int[renderWidth, renderHeight];
             
@@ -79,7 +85,7 @@ namespace Fractality
             {
                 for (var i = 0; i < renderWidth; i++)
                 {
-                    if (worker.CancellationPending) return;
+                    if (Worker.CancellationPending) return;
 
                     var x = xStart + i * xStep;
                     var y = yStart - j * yStep;
@@ -88,7 +94,7 @@ namespace Fractality
                 }
                 rowsCalculated++;
                 var progressPercentage = (double) rowsCalculated / renderHeight * 100;
-                worker.ReportProgress((int) progressPercentage);
+                Worker.ReportProgress((int) progressPercentage);
             });
         }
 

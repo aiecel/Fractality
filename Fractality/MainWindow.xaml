@@ -9,38 +9,63 @@
         Title="Fractality" Height="768" Width="1024">
     <Window.Resources>
         <cm:BackgroundWorker x:Key="backgroundWorker" 
-                             DoWork="BackgroundWorker_OnDoWork"
-                             RunWorkerCompleted="BackgroundWorker_OnRunWorkerCompleted"
-                             ProgressChanged="BackgroundWorker_OnProgressChanged"
+                             DoWork="WorkerOnDoWork"
+                             RunWorkerCompleted="RenderCompleted"
+                             ProgressChanged="RenderProgressChanged"
                              WorkerSupportsCancellation="True"
                              WorkerReportsProgress="True"></cm:BackgroundWorker>
     </Window.Resources>
-    
+
     <DockPanel LastChildFill="True">
-        <StackPanel DockPanel.Dock="Right" Width="200">
+        <StackPanel DockPanel.Dock="Right" Width="220">
             <TextBlock Text="Controls:" 
                        FontWeight="Bold" 
                        Margin="10, 10, 10, 10" />
-            
+
             <Grid Margin="10, 0, 10, 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                
+
                 <TextBlock Grid.Column="0" Text="Zoom Factor:"></TextBlock>
                 <TextBox Grid.Column="1" Name="ZoomFactorBox" Text="2"></TextBox>
             </Grid>
-            
+
             <Separator Margin="10, 15, 10, 10" />
             
+            <TextBlock Text="Navigation:" 
+                       FontWeight="Bold" 
+                       Margin="10, 10, 10, 10" />
+
+            <TextBlock Text="Origin:" 
+                       Margin="10, 0, 10, 2" />
+            <Grid Margin="10, 10, 10, 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="X:"></TextBlock>
+                <TextBox Grid.Column="1" Grid.Row="0" Name="OriginXBox" Text="unknown"></TextBox>
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Y:"></TextBlock>
+                <TextBox Grid.Column="1" Grid.Row="1" Name="OriginYBox" Text="unknown"></TextBox>
+            </Grid>
+
+            <Separator Margin="10, 15, 10, 10" />
+
             <TextBlock Text="Render:" 
                        FontWeight="Bold" 
                        Margin="10, 0, 10, 10" />
-            
+
             <TextBlock Text="Resolution:" 
                        Margin="10, 0, 10, 2" />
-            
+
             <Grid Margin="10, 0, 10, 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -50,43 +75,87 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                
+
                 <TextBlock Grid.Column="0" Text="Width"></TextBlock>
                 <TextBlock Grid.Column="1" Grid.Row="0" Text="Height"></TextBlock>
                 <TextBox Grid.Column="0" Grid.Row="1" Name="WidthResBox" Text="640"></TextBox>
                 <TextBox Grid.Column="1" Grid.Row="1" Name="HeightResBox" Text="480"></TextBox>
             </Grid>
-            
+
             <Grid Margin="10, 10, 10, 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                
+
                 <TextBlock Grid.Column="0" Text="Max iterations:"></TextBlock>
                 <TextBox Grid.Column="1" Name="MaxIterationsBox" Text="100"></TextBox>
             </Grid>
 
-            <Separator Margin="10, 15, 10, 15" />
+            <Separator Margin="10, 15, 10, 10" />
+
+            <TextBlock Text="Color:" 
+                       FontWeight="Bold" 
+                       Margin="10, 0, 10, 10" />
+
+            <Grid Margin="10, 0, 10, 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Style:" Margin="0, 2, 10, 0"></TextBlock>
+                <ComboBox Name="ColorStyleComboBox" Grid.Column="1">
+                    <ComboBoxItem Content="Palette" Selected="PaletteStyleSelected"></ComboBoxItem>
+                    <ComboBoxItem Content="Monochrome" Selected="MonochromeStyleSelected"></ComboBoxItem>
+                </ComboBox>
+            </Grid>
             
+            <StackPanel Name="PalettePanel">
+                <Image Height="15" Width="200" Name="PaletteImage" Stretch="Fill" Margin="0, 10, 0, 5"></Image>
+                
+                <Button Name="SelectPaletteButton"
+                        Content="Choose image" 
+                        Click="SelectPalette"
+                        Margin="10, 5, 10, 5"/>
+                <CheckBox Margin="10, 5, 10, 5">Repeat palette</CheckBox>
+                
+                <Grid Visibility="Collapsed" Margin="10, 0, 10, 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+    
+                    <TextBlock Grid.Column="0" Text="Repeat distance:"></TextBlock>
+                    <TextBox Grid.Column="1" Name="RepeatDistanceBox" Text="100"></TextBox>
+                </Grid>
+    
+                <Button Name="ApplyPaletteButton"
+                        Content="Apply" 
+                        Click="ApplyPaletteButtonPressed"
+                        Margin="10, 5, 10, 0"/>
+            </StackPanel>
+
+            <Separator Margin="10, 15, 10, 15" />
+
             <Button Name="RenderButton"
                     Content="Render" 
                     FontWeight="Bold"
                     Height="30"
-                    Click="RenderButton_OnClick"
+                    Click="RenderButtonOnClick"
                     Margin="10, 0, 10, 5"/>
-            
+
             <Button Name="SaveToFileButton"
                     Content="Save to file" 
-                    Click="RenderToFileButton_OnClick"
+                    Click="SaveImage"
                     Margin="10, 0, 10, 0"/>
-            
+
             <Button Name="ResetViewButton"
                     Content="Reset view" 
-                    Click="ResetViewButton_OnClick"
+                    Click="ResetView"
                     Margin="10, 5, 10, 0"/>
         </StackPanel>
-        
+
         <StackPanel DockPanel.Dock="Bottom" Height="25" Orientation="Horizontal" Background="LightGray">
             <TextBlock Name="ZoomText" Text="" Margin="5, 4, 5, 4"></TextBlock>
             <TextBlock Name="OriginText" Text="" Margin="5, 4, 5, 4"></TextBlock>
@@ -97,11 +166,11 @@
                 <ProgressBar Name="RenderBar" Width="200" Grid.Column="3" Height="10"/>
             </StackPanel>
         </StackPanel>
-        
+
         <Grid Background="#1E1E1E">
             <Image Name="RenderImage"
-                   MouseLeftButtonDown="RenderImage_OnMouseLeftButtonUp"
-                   MouseRightButtonDown="RenderImage_OnMouseRightButtonDown"
+                   MouseLeftButtonDown="RenderImageOnLeftMouseDown"
+                   MouseRightButtonDown="RenderImageOnRightMouseDown"
                    Cursor="Cross"/>
         </Grid>
     </DockPanel>
