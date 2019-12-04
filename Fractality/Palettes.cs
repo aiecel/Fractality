@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -7,6 +8,7 @@ namespace Fractality
 {
     public interface Palette
     {
+        string Name();
         Color GetColor(double percentage);
     }
     
@@ -14,17 +16,25 @@ namespace Fractality
     {
         private byte[] pixels;
         private int width;
+        private readonly string name;
 
         public BitmapSource Image { get; private set; }
 
         public BitmapPalette(string path)
         {
             getFromImage(new BitmapImage(new Uri(path)));
+            name = Path.GetFileNameWithoutExtension(path);
+        }
+
+        public string Name()
+        {
+            return name;
         }
 
         public BitmapPalette(BitmapSource image)
         {
             getFromImage(image);
+            name = "Unnamed palette";
         }
 
         public Color GetColor(double percentage)

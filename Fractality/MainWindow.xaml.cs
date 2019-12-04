@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
@@ -29,7 +28,7 @@ namespace Fractality
         public MainWindow()
         {
             InitializeComponent();
-            UpdatePalette(new BitmapPalette("C:\\Users\\Borrow\\RiderProjects\\Fractality\\Fractality\\Palettes\\default.png"));
+            UpdatePalette(new BitmapPalette(Path.GetFullPath("Palettes/cyberpunk.png")));
             worker = (BackgroundWorker) FindResource("backgroundWorker");
             RenderImage.Source = renderedImage;
             StartRender();
@@ -132,14 +131,13 @@ namespace Fractality
         {
             try
             {
-                
                 var bitmap = renderer.Render(lastRenderWidth, lastRenderHeight, palette);
                 bitmap.Freeze();
                 e.Result = bitmap;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.StackTrace);
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
         }
         
@@ -174,7 +172,11 @@ namespace Fractality
         
         private void SelectPalette(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog();
+            var openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = Path.GetFullPath("Palettes"),
+                DefaultExt = ".png"
+            };
             if (openFileDialog.ShowDialog() == true)
             {
                 UpdatePalette(new BitmapPalette(openFileDialog.FileName));
@@ -187,6 +189,7 @@ namespace Fractality
         {
             palette = newPalette;
             PaletteImage.Source = ((BitmapPalette) palette).Image;
+            PaletteNameText.Text = palette.Name();
         }
         
         private void ApplyPaletteButtonPressed(object sender, RoutedEventArgs e)

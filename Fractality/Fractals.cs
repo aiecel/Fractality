@@ -5,6 +5,10 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
+using Cudafy;
+using Cudafy.Host;
+using Cudafy.Translator;
+
 namespace Fractality
 {
     public class MandelbrotRenderer
@@ -13,14 +17,36 @@ namespace Fractality
         public double OriginY { get; set; }
         public double MultiplyFactor { get; set; } = 1;
         public int MaxIterations { get; set; } = 100;
-        
         public BackgroundWorker Worker { get; set; }
         
         private int[,] iterationMap;
+        private GPGPU gpu;
+
+        public MandelbrotRenderer()
+        {
+            CudafyModes.Target = eGPUType.OpenCL;
+            CudafyTranslator.Language = eLanguage.OpenCL;
+            
+            gpu = CudafyHost.GetDevice(CudafyModes.Target, CudafyModes.DeviceId);
+            var module = CudafyTranslator.Cudafy();
+            gpu.LoadModule(module);
+        }
 
         public BitmapSource Render(int renderWidth, int renderHeight, Palette palette)
         {
-            Map(renderWidth, renderHeight);
+            iterationMap = new int[renderWidth, renderHeight];
+            
+            var deviceIterationMap = gpu.CopyToDevice(iterationMap);
+
+            var gridX = (int) Math.Ceiling(renderWidth / 1024d);
+            
+            gpu.Launch(new dim3(gridX, renderHeight), 1024).Map(deviceIterationMap, MaxIterations, OriginX, OriginY, MultiplyFactor);
+            gpu.Synchronize();
+            
+            gpu.CopyFromDevice(deviceIterationMap, iterationMap);
+            gpu.FreeAll();
+
+            //Map(deviceIterationMap);
             return WriteBitmap(renderWidth, renderHeight, palette);
         }
 
@@ -65,46 +91,48 @@ namespace Fractality
             return bitmap;
         }
         
-        private void Map(int renderWidth, int renderHeight)
+        [Cudafy]
+        private static void Map(GThread thread, int[,] iterationMap, int maxIterations, double originX, double originY, double multiplyFactor)
         {
-            iterationMap = new int[renderWidth, renderHeight];
-            
+            var renderWidth = iterationMap.GetLength(0);
+            var renderHeight = iterationMap.GetLength(1);
+
+            var threadIndex = thread.threadIdx.x;
+            var blockIndexX = thread.blockIdx.x;
+            var blockIndexY = thread.blockIdx.y;
+            if (threadIndex + 1024 * blockIndexX > renderWidth) return;
+
             var ratio = (double) renderWidth / renderHeight;
-            var areaHeight = 4d / MultiplyFactor;
+            var areaHeight = 4d / multiplyFactor;
             var areaWidth = areaHeight * ratio;
-            
-            var xStart = OriginX - areaWidth / 2d;
-            var yStart = OriginY + areaHeight / 2d;
 
-            var xStep = areaWidth / renderWidth;
-            var yStep = areaHeight / renderHeight;
+            var stepX = areaWidth / renderWidth;
+            var stepY = areaHeight / renderHeight;
             
-            var rowsCalculated = 0;
-            
-            Parallel.For(0, renderHeight, j =>
-            {
-                for (var i = 0; i < renderWidth; i++)
-                {
-                    if (Worker.CancellationPending) return;
+            var x = originX - areaWidth / 2d + 1024 * blockIndexX * stepX + stepX * threadIndex;
+            var y = originY + areaHeight / 2d - blockIndexY * stepY;
 
-                    var x = xStart + i * xStep;
-                    var y = yStart - j * yStep;
-                    
-                    iterationMap[i, j] = LeavingIterations(new Complex(x, y));
-                }
-                rowsCalculated++;
-                var progressPercentage = (double) rowsCalculated / renderHeight * 100;
-                Worker.ReportProgress((int) progressPercentage);
-            });
+            iterationMap[threadIndex + 1024 * blockIndexX, blockIndexY] = LeavingIterations(x, y, maxIterations);
+            //rowsCalculated++;
+            //var progressPercentage = (double) rowsCalculated / renderHeight * 100;
+            //Worker.ReportProgress((int) progressPercentage);
         }
-
-        private int LeavingIterations(Complex c)
+        
+        [Cudafy]
+        private static int LeavingIterations(double real, double im, int maxIterations)
         {
-            var z = new Complex(0, 0);
-            for (var i = 0; i < MaxIterations; i++)
+            double zReal = 0;
+            double zIm = 0;
+            for (var i = 0; i < maxIterations; i++)
             {
-                z = z.Square() + c;
-                if (z.Mod() > 2) return i + 1;
+                var zRealNew = zReal * zReal - zIm * zIm + real;
+                var zImNew = 2 * zReal * zIm + im;
+                if (Math.Sqrt(zRealNew * zRealNew + zImNew * zImNew) > 2)
+                {
+                    return i + 1;
+                }
+                zReal = zRealNew;
+                zIm = zImNew;
             }
             return -1;
         }
