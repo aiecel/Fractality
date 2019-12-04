@@ -19,11 +19,14 @@ namespace Fractality
         private int renderWidth = 0;
         private int renderHeight = 0;
         private Stopwatch watch = new Stopwatch();
+        private BitmapSource image;
 
         public MainWindow()
         {
             InitializeComponent();
             worker = (BackgroundWorker)FindResource("backgroundWorker");
+            RenderImage.Source = image;
+            Render();
         }
         
         private void RenderButton_OnClick(object sender, RoutedEventArgs e)
@@ -46,11 +49,10 @@ namespace Fractality
             var saveFileDialog = new SaveFileDialog();
             if (saveFileDialog.ShowDialog() == true)
             {
-                var a = renderer.Render(renderWidth, renderHeight, worker);
                 using (var stream = new FileStream(saveFileDialog.FileName, FileMode.Create))
                 {
                     var encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(a));
+                    encoder.Frames.Add(BitmapFrame.Create(image));
                     encoder.Save(stream);
                 }
             }
@@ -134,7 +136,8 @@ namespace Fractality
         {
             watch.Stop();
             RenderingPanel.Visibility = Visibility.Hidden;
-            RenderImage.Source = (BitmapSource) e.Result;
+            image = (BitmapSource) e.Result;
+            RenderImage.Source = image;
             TimeText.Text = watch.ElapsedMilliseconds + "ms.";
             ZoomText.Text = "x" + renderer.MultiplyFactor;
             OriginText.Text = "Origin: x=" + renderer.OriginX + "; y=" + renderer.OriginY;

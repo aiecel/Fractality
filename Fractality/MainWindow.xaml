@@ -57,11 +57,15 @@
                 <TextBox Grid.Column="1" Grid.Row="1" Name="HeightResBox" Text="480"></TextBox>
             </Grid>
             
-            <TextBlock Text="Max iterations:" 
-                       Margin="10, 10, 10, 2" />
-            <TextBox Name="MaxIterationsBox"
-                     Text="100"
-                     Margin="10, 0, 10, 2" />
+            <Grid Margin="10, 10, 10, 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="Max iterations:"></TextBlock>
+                <TextBox Grid.Column="1" Name="MaxIterationsBox" Text="100"></TextBox>
+            </Grid>
 
             <Separator Margin="10, 15, 10, 15" />
             
